@@ -11,9 +11,8 @@ Dependencies used:-
 4) fs - to create and save data into file.
 
 # Run code 
-run the command 'node index.js' and the hit url 'http://localhost:3000/getLinks' which will run a function that fetches all the links of posts on home page of medium.com. Since medium.com uses dynamic JS to load its content that's why puppeteer has been used that loads dynamic JS.
-All the links fetched will be saved in 'links.txt' file in form of object => {
-    "page link":'link of the post',
-    "all links":'array of all the internal links'
-}
-cheerio has been used in order to use jquery in scraped data, inorder to select only the post's url.
+1) run the command 'node index.js' and the hit url 'http://localhost:3000/getLinks' which will run a function that fetches all the links of posts on home page of medium.com. Since medium.com uses dynamic JS to load its content that's why puppeteer has been used that loads dynamic JS.
+
+2) All the links fetched will be saved in 'links.txt' file in form of object. Each object consists of the link of the post and an array of it's internal URLs.
+
+3) cheerio has been used in order to use jquery in scraped data, inorder to select only the post's url.
