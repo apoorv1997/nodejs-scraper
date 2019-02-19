@@ -15,4 +15,4 @@ Dependencies used:-
 
 2) All the links fetched will be saved in 'links.txt' file in form of object. Each object consists of the link of the post and an array of it's internal URLs.
 
-3) cheerio has been used in order to use jquery in scraped data, inorder to select only the post's url.
+3) cheerio has been used in order to use jquery in scraped data, inorder to select only the post's url and concurrent connections have been set up to only 5 using command server.maxConnection = 5.
