@@ -1,15 +1,14 @@
 const cheerio = require('cheerio');
 var express = require('express');
-const app = express();
-const server = require('http').createServer(app);
 const puppeteer = require('puppeteer');
 const url = 'https://medium.com/';
 const fs = require('fs');
 const links = [];
 const internalLinks = [];
-server.maxConnections = 5;
+const maxConnections = 5; //setting max connection for concurrency. 
+var runningConnections = 0; //to check for the number of jobs running.
 
-app.get('/getLinks', async () => {
+getLinks = async () => {
     console.log("enter");
     puppeteer.launch().then(function(browser) {
     return browser.newPage();
@@ -27,18 +26,20 @@ app.get('/getLinks', async () => {
             var link = $(value).attr('href');
             links.push(link);
         });
-        scrapSite(links);
+        scrapSite(links); 
     }).catch((error) => {
         console.log(error);
     })
-});
+}
 
-async function scrapSite(links)  {
-    for(let i=0;i<links.length;i++) {
-        console.log(`Link${i+1}: ${links[i]}`)
+scrapSite = async (links) =>  {
+    if(links.length===0 && runningConnections <= maxConnections) // condition to maintain number of jobs running to max connection.
+        return internalLinks;
+    else if(runningConnections < maxConnections) {
+        runningConnections++;
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
-        await page.goto(links[i], {waitUntil: 'load', timeout: 0});
+        await page.goto(links[0], {waitUntil: 'load', timeout: 0});
         const html = await page.content();
         $ = cheerio.load(html);
         $('.section-content > .section-inner > p > a').each(function(i, value) {
@@ -46,15 +47,22 @@ async function scrapSite(links)  {
             internalLinks.push(link);
         })
         const Data = {
-            "Page Link":links[i],
+            "Page Link":links[0],
             "Links":internalLinks
         }
         fs.appendFile('links.txt', JSON.stringify(Data)+"\n",'utf-8', function (err) {
             if (err) throw err;
             console.log('Saved!');
+            runningConnections--;
         });
         await browser.close();
+        console.log(links);
+        scrapSite(links.slice(1)); //calling helper function recursively.
+    }
+    else if(runningConnections > maxConnections) {
+        console.log("Number of jobs exceeded");
     }
     console.log("Finished");
 }
-server.listen(3000);
+
+getLinks();
